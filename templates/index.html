@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Diagnosis Prediction</title>
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+    <style>
+        body {
+            background-color: #f8f9fa;
+            padding-top: 50px;
+        }
+        .container {
+            max-width: 600px;
+        }
+        .form-check-label {
+            font-weight: normal;
+        }
+        #result {
+            margin-top: 20px;
+        }
+        #result img {
+            max-width: 100%;
+            margin-top: 20px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1 class="text-center">Diagnosis Prediction</h1>
+        <form action="/predict" method="post">
+            {% for gejala in gejala_list %}
+            <div class="form-check">
+                <input class="form-check-input" type="checkbox" id="{{ gejala }}" name="{{ gejala }}" value="1">
+                <label class="form-check-label" for="{{ gejala }}">{{ gejala }}</label>
+            </div>
+            {% endfor %}
+            <button type="submit" class="btn btn-primary mt-3">Predict</button>
+        </form>
+        <div id="result">
+            {% if prediction %}
+            <h2 class="mt-5">Prediction: {{ prediction }}</h2>
+            {% if prob_dict %}
+            <h3 class="mt-4">Probabilities:</h3>
+            <ul class="list-group">
+                {% for diagnosa, probabilitas in prob_dict.items() %}
+                <li class="list-group-item">{{ diagnosa }}: {{ probabilitas }}</li>
+                {% endfor %}
+            </ul>
+            {% endif %}
+            <img src="{{ tree_image }}" alt="Decision Tree" class="mt-5">
+            {% endif %}
+        </div>
+    </div>
+</body>
+</html>

@@ -1,0 +1,435 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <title>DiPrevaSympto</title>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+
+  <link href="{{ url_for('static', filename='css/google_fonts.css') }}" rel="stylesheet">
+
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/open-iconic-bootstrap.min.css') }}">
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/animate.css') }}">
+
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/owl.carousel.min.css') }}">
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/owl.theme.default.min.css') }}">
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/magnific-popup.css') }}">
+
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/aos.css') }}">
+
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/ionicons.min.css') }}">
+
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/bootstrap-datepicker.css') }}">
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/jquery.timepicker.css') }}">
+
+
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/flaticon.css') }}">
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/icomoon.css') }}">
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.4.0/jspdf.umd.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.15/jspdf.plugin.autotable.min.js"></script>
+
+</head>
+
+<body>
+
+  <nav class="navbar navbar-expand-lg navbar-dark ftco_navbar bg-dark ftco-navbar-light" id="ftco-navbar">
+    <div class="container">
+      <a class="navbar-brand" href="{{ url_for('home') }}">DiPreva<span>Sympto</span></a>
+      <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#ftco-nav"
+        aria-controls="ftco-nav" aria-expanded="false" aria-label="Toggle navigation">
+        <span class="oi oi-menu"></span> Menu
+      </button>
+
+      <div class="collapse navbar-collapse" id="ftco-nav">
+        <ul class="navbar-nav ml-auto">
+          <li class="nav-item active"><a href="{{ url_for('home') }}" class="nav-link">Home</a></li>
+          <li class="nav-item"><a href="{{ url_for('about') }}" class="nav-link">About</a></li>
+          <li class="nav-item"><a href="{{ url_for('services') }}" class="nav-link">Prediction</a></li>
+          <!-- <li class="nav-item"><a href="{{ url_for('doctors') }}" class="nav-link">Doctors</a></li>
+	          <li class="nav-item"><a href="{{ url_for('blog') }}" class="nav-link">Blog</a></li> -->
+          <!-- <li class="nav-item"><a href="{{ url_for('contact') }}" class="nav-link">Contact</a></li> -->
+      </div>
+    </div>
+  </nav>
+  <!-- END nav -->
+
+  <section class="home-slider owl-carousel">
+    <div class="slider-item bread-item"
+      style="background-image: url('{{ url_for('static', filename='images/bg_1.jpg') }}');"
+      data-stellar-background-ratio="0.5">
+      <div class="overlay"></div>
+      <div class="container" data-scrollax-parent="true">
+        <div class="row slider-text align-items-end">
+          <div class="col-md-7 col-sm-12 ftco-animate mb-5">
+            <p class="breadcrumbs" data-scrollax=" properties: { translateY: '70%', opacity: 1.6}"><span class="mr-2"><a
+                  href="{{ url_for('home') }}">Home</a></span> <span>Prediction</span></p>
+            <h1 class="mb-3" data-scrollax=" properties: { translateY: '70%', opacity: .9}">Our Service Keeps you Healthy
+            </h1>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+
+  <div class="container">
+
+  </div>
+  </section>
+
+  <!-- New section with form for symptom input -->
+  <section class="ftco-section">
+    <div class="container">
+      <div class="row justify-content-center mb-5 pb-5">
+        <div class="col-md-7 text-center heading-section ftco-animate">
+          <h2 class="mb-2">Diagnosis Predictor</h2>
+          <p>A small river named Duden flows by their place and supplies it with the necessary regelialia.</p>
+        </div>
+      </div>
+      <form method="POST" action="/predict" id="predictionForm">
+        <div class="form-group">
+          <label for="name">Name</label>
+          <input type="text" class="form-control" id="name" name="name" required>
+        </div>
+        <div class="form-group">
+          <label for="age">Age</label>
+          <input type="number" class="form-control" id="age" name="age" required>
+        </div>
+        <div class="row">
+          {% for gejala in gejala_list %}
+          <div class="col-md-3">
+            <div class="form-check">
+              <input class="form-check-input" type="checkbox" id="{{ gejala }}" name="{{ gejala }}" value="1">
+              <label class="form-check-label" for="{{ gejala }}">{{ gejala }}</label>
+            </div>
+          </div>
+          {% endfor %}
+        </div>
+        <button type="submit" class="btn btn-primary mt-3" id="predictButton">Predict</button>
+        <button type="button" class="btn btn-primary mt-3" id="pdfButton" style="display: none;">Export PDF</button>
+      </form>
+      <div id="result" class="mt-5">
+        {% if prediction %}
+        <h2>Prediction: {{ prediction }}</h2>
+        <p><strong>Description:</strong> {{ diagnosis_details.description }}</p>
+        <p><strong>Treatment:</strong> {{ diagnosis_details.treatment }}</p>
+        {% if prob_dict %}
+        <h3 class="mt-4">Probabilities:</h3>
+        <ul class="list-group">
+          {% for diagnosa, probabilitas in prob_dict.items() %}
+          <li class="list-group-item">{{ diagnosa }}: {{ probabilitas * 100 }}</li>
+          {% endfor %}
+        </ul>
+        {% endif %}
+        <img src="{{ tree_image }}" alt="Decision Tree" class="mt-5 img-fluid" style="max-width: 100%;">
+        {% endif %}
+      </div>
+    </div>
+  </section>
+
+  <script>
+    document.getElementById('predictButton').onclick = function (e) {
+  e.preventDefault();
+  const formData = new FormData(document.getElementById('predictionForm'));
+
+  fetch('/predict', {
+    method: 'POST',
+    headers: {
+      'X-Requested-With': 'XMLHttpRequest'
+    },
+    body: formData
+  })
+    .then(response => response.json())
+    .then(data => {
+      // Update the page with the prediction results
+      const resultDiv = document.getElementById('result');
+      let resultHTML = `<h2>Prediction: ${data.prediction}</h2>
+      <p><strong>Description:</strong> ${data.diagnosis_details.description}</p>
+      <p><strong>Treatment:</strong> ${data.diagnosis_details.treatment}</p>`;
+
+      if (data.prob_dict) {
+        resultHTML += `<h3 class="mt-4">Probabilities:</h3><ul class="list-group">`;
+        for (const [diagnosa, probabilitas] of Object.entries(data.prob_dict)) {
+          resultHTML += `<li class="list-group-item">${diagnosa}: ${(probabilitas * 100).toFixed(2)}%</li>`;
+        }
+        resultHTML += `</ul>`;
+      }
+
+      resultHTML += `<img src="${data.tree_image}" alt="Decision Tree" class="mt-5 img-fluid" style="max-width: 100%;">`;
+      resultDiv.innerHTML = resultHTML;
+
+      // Store the response data for the PDF generation
+      document.getElementById('predictionForm').dataset.predictionData = JSON.stringify(data);
+
+      // Show the PDF button
+      document.getElementById('pdfButton').style.display = 'inline-block';
+    })
+    .catch(error => console.error('Error:', error));
+};
+
+document.getElementById('pdfButton').onclick = function (e) {
+  e.preventDefault();
+  const name = document.getElementById('name').value;
+  const age = document.getElementById('age').value;
+
+  const formData = new FormData(document.getElementById('predictionForm'));
+  const symptoms = [];
+  for (let [key, value] of formData.entries()) {
+    if (key !== 'name' && key !== 'age' && value === '1') {
+      symptoms.push(key);
+    }
+  }
+
+  const predictionData = JSON.parse(document.getElementById('predictionForm').dataset.predictionData);
+
+  // Get the current date and time
+  const currentDate = new Date();
+  const dateTimeString = currentDate.toLocaleString(); // Format the date and time as a string
+
+  // Format the filename
+  const formattedDate = currentDate.toISOString().split('T')[0];
+  const filename = `${name}-${formattedDate}-predict.pdf`;
+
+  // Handle the PDF generation and download
+  const { jsPDF } = window.jspdf;
+  const doc = new jsPDF();
+
+  // Set the font and style for the template
+  doc.setFont('Helvetica');
+  doc.setFontSize(12);
+
+  // Add prescription template details
+  doc.setFontSize(18);
+  doc.text('PRESCRIPTION TEMPLATE', 105, 20, null, null, 'center');
+
+  doc.setFontSize(12);
+  doc.setTextColor(255, 0, 0);
+  doc.text('Prescription No.', 20, 30);
+  doc.text('Prescription Date', 150, 30);
+  doc.setTextColor(0, 0, 0);
+  doc.text('0001', 20, 35);
+  doc.text(dateTimeString, 150, 35);
+
+  doc.setDrawColor(47, 137, 252);
+  doc.setLineWidth(1);
+  doc.line(20, 40, 190, 40);
+
+  doc.setFontSize(12);
+  doc.setTextColor(255, 0, 0);
+  doc.text('Patient Information', 20, 50);
+  doc.setTextColor(0, 0, 0);
+  doc.text(`Name: ${name}`, 20, 55);
+  doc.text(`Age: ${age}`, 20, 60);
+
+  doc.setDrawColor(47, 137, 252);
+  doc.setLineWidth(1);
+  doc.line(20, 65, 190, 65);
+
+  // List of symptoms
+  let y = 70;
+  if (symptoms.length > 0) {
+    doc.setFontSize(12);
+    doc.setTextColor(255, 0, 0);
+    doc.text('Symptoms Entered', 20, y);
+    doc.setTextColor(0, 0, 0);
+    y += 5;
+    symptoms.forEach((symptom) => {
+      doc.text(`- ${symptom}`, 20, y);
+      y += 5;
+    });
+
+    doc.setDrawColor(47, 137, 252);
+    doc.setLineWidth(1);
+    doc.line(20, y, 190, y);
+    y += 5;
+  }
+
+  // Probabilities table
+  if (predictionData.prob_dict) {
+    doc.setFontSize(12);
+    doc.setTextColor(255, 0, 0);
+    doc.text('List of probabilities', 20, y);
+    doc.setTextColor(0, 0, 0);
+    y += 5;
+    doc.autoTable({
+      startY: y,
+      theme: 'grid',
+      styles: { fontSize: 12 },
+      headStyles: { fillColor: [47, 137, 252] },
+      margin: { top: 10 },
+      head: [['Diagnosis', 'Probability (%)']],
+      body: Object.entries(predictionData.prob_dict).map(([key, value]) => [key, (value * 100).toFixed(2)])
+    });
+  }
+
+  doc.save(filename);
+};
+
+  </script>
+  
+
+  <footer class="ftco-footer ftco-bg-dark ftco-section">
+    <div class="container">
+      <div class="row mb-5">
+        <div class="col-md-3">
+          <div class="ftco-footer-widget mb-4">
+            <a class="navbar-brand" href="{{ url_for('home') }}">DiPreva<span>Sympto</span></a>
+            <p>With a touch of insight, DiPrevaSympto unveils hidden threats, empowering early diagnosis and predicting
+              diseases from mere whispers of symptoms.</p>
+          </div>
+          <ul class="ftco-footer-social list-unstyled float-md-left float-lft ">
+            <li class="ftco-animate"><a href="#"><span class="icon-twitter"></span></a></li>
+            <li class="ftco-animate"><a href="#"><span class="icon-facebook"></span></a></li>
+            <li class="ftco-animate"><a href="#"><span class="icon-instagram"></span></a></li>
+          </ul>
+        </div>
+        <div class="col-md-2">
+          <div class="ftco-footer-widget mb-4 ml-md-5">
+            <h2 class="ftco-heading-2">Quick Links</h2>
+            <ul class="list-unstyled">
+              <li><a href="{{ url_for('home') }}" class="py-2 d-block">Home</a></li>
+              <li><a href="{{ url_for('about') }}" class="py-2 d-block">About</a></li>
+            </ul>
+          </div>
+        </div>
+        <div class="col-md-4 pr-md-4">
+          <div class="ftco-footer-widget mb-4">
+            <h2 class="ftco-heading-2">Recent Blog</h2>
+            <div class="block-21 mb-4 d-flex">
+              <a class="blog-img mr-4"
+                style="background-image: url('{{ url_for('static', filename='images/image_1.jpg') }}');"></a>
+              <div class="text">
+                <h3 class="heading"><a href="#">Even the all-powerful Pointing has no control about</a></h3>
+                <div class="meta">
+                  <div><a href="#"><span class="icon-calendar"></span> May 15, 2024</a></div>
+                  <div><a href="#"><span class="icon-person"></span> Admin</a></div>
+                  <div><a href="#"><span class="icon-chat"></span> 19</a></div>
+                </div>
+              </div>
+            </div>
+            <div class="block-21 mb-4 d-flex">
+              <a class="blog-img mr-4"
+                style="background-image: url('{{ url_for('static', filename='images/image_2.jpg') }}');"></a>
+              <div class="text">
+                <h3 class="heading"><a href="#">Even the all-powerful Pointing has no control about</a></h3>
+                <div class="meta">
+                  <div><a href="#"><span class="icon-calendar"></span> Sept 15, 2023</a></div>
+                  <div><a href="#"><span class="icon-person"></span> Admin</a></div>
+                  <div><a href="#"><span class="icon-chat"></span> 19</a></div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="col-md-3">
+          <div class="ftco-footer-widget mb-4">
+            <h2 class="ftco-heading-2">Office</h2>
+            <div class="block-23 mb-3">
+              <ul>
+                <li><span class="icon icon-map-marker"></span><span class="text">Jl. Ketintang No.156, Ketintang, Kec.
+                    Gayungan, Surabaya, Jawa Timur 60231</span></li>
+                <li><a href="#"><span class="icon icon-phone"></span><span class="text">0811-3278-005</span></a></li>
+                <li><a href="#"><span class="icon icon-envelope"></span><span
+                      class="text">tel-u@telkomuniversity.ac.id</span></a></li>
+              </ul>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="row">
+        <div class="col-md-12 text-center">
+
+          <p><!-- Link back to Colorlib can't be removed. Template is licensed under CC BY 3.0. -->
+            Copyright &copy;
+            <script>document.write(new Date().getFullYear());</script> All rights reserved | This template is made with
+            <i class="icon-heart" aria-hidden="true"></i> by <a href="https://colorlib.com" target="_blank">Colorlib</a>
+            <!-- Link back to Colorlib can't be removed. Template is licensed under CC BY 3.0. -->
+          </p>
+        </div>
+      </div>
+    </div>
+  </footer>
+
+  <!-- loader -->
+  <div id="ftco-loader" class="show fullscreen"><svg class="circular" width="48px" height="48px">
+      <circle class="path-bg" cx="24" cy="24" r="22" fill="none" stroke-width="4" stroke="#eeeeee" />
+      <circle class="path" cx="24" cy="24" r="22" fill="none" stroke-width="4" stroke-miterlimit="10"
+        stroke="#F96D00" />
+    </svg></div>
+
+  <!-- Modal -->
+  <div class="modal fade" id="modalRequest" tabindex="-1" role="dialog" aria-labelledby="modalRequestLabel"
+    aria-hidden="true">
+    <div class="modal-dialog" role="document">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title" id="modalRequestLabel">Make an Appointment</h5>
+          <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+            <span aria-hidden="true">&times;</span>
+          </button>
+        </div>
+        <div class="modal-body">
+          <form action="#">
+            <div class="form-group">
+              <!-- <label for="appointment_name" class="text-black">Full Name</label> -->
+              <input type="text" class="form-control" id="appointment_name" placeholder="Full Name">
+            </div>
+            <div class="form-group">
+              <!-- <label for="appointment_email" class="text-black">Email</label> -->
+              <input type="text" class="form-control" id="appointment_email" placeholder="Email">
+            </div>
+            <div class="row">
+              <div class="col-md-6">
+                <div class="form-group">
+                  <!-- <label for="appointment_date" class="text-black">Date</label> -->
+                  <input type="text" class="form-control appointment_date" placeholder="Date">
+                </div>
+              </div>
+              <div class="col-md-6">
+                <div class="form-group">
+                  <!-- <label for="appointment_time" class="text-black">Time</label> -->
+                  <input type="text" class="form-control appointment_time" placeholder="Time">
+                </div>
+              </div>
+            </div>
+
+
+            <div class="form-group">
+              <!-- <label for="appointment_message" class="text-black">Message</label> -->
+              <textarea name="" id="appointment_message" class="form-control" cols="30" rows="10"
+                placeholder="Message"></textarea>
+            </div>
+            <div class="form-group">
+              <input type="submit" value="Make an Appointment" class="btn btn-primary">
+            </div>
+          </form>
+        </div>
+
+      </div>
+    </div>
+  </div>
+
+  <script src="{{ url_for('static', filename='js/jquery.min.js') }}"></script>
+  <script src="{{ url_for('static', filename='js/jquery-migrate-3.0.1.min.js') }}"></script>
+  <script src="{{ url_for('static', filename='js/popper.min.js') }}"></script>
+  <script src="{{ url_for('static', filename='js/bootstrap.min.js') }}"></script>
+  <script src="{{ url_for('static', filename='js/jquery.easing.1.3.js') }}"></script>
+  <script src="{{ url_for('static', filename='js/jquery.waypoints.min.js') }}"></script>
+  <script src="{{ url_for('static', filename='js/jquery.stellar.min.js') }}"></script>
+  <script src="{{ url_for('static', filename='js/owl.carousel.min.js') }}"></script>
+  <script src="{{ url_for('static', filename='js/jquery.magnific-popup.min.js') }}"></script>
+  <script src="{{ url_for('static', filename='js/aos.js') }}"></script>
+  <script src="{{ url_for('static', filename='js/jquery.animateNumber.min.js') }}"></script>
+  <script src="{{ url_for('static', filename='js/bootstrap-datepicker.js') }}"></script>
+  <script src="{{ url_for('static', filename='js/jquery.timepicker.min.js') }}"></script>
+  <script src="{{ url_for('static', filename='js/scrollax.min.js') }}"></script>
+  <script
+    src="https://maps.googleapis.com/maps/api/js?key=AIzaSyBVWaKrjvy3MaE7SQ74_uJiULgl1JY0H2s&sensor=false"></script>
+  <script src="{{ url_for('static', filename='js/google-map.js') }}"></script>
+  <script src="{{ url_for('static', filename='js/main.js') }}"></script>
+
+</body>
+
+</html>
